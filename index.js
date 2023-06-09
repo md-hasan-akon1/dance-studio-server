@@ -2,12 +2,16 @@ const express = require('express');
 const app = express();
 const cors = require('cors');
 require('dotenv').config();
+const jwt = require('jsonwebtoken');
 const port = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 
 
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const {
+  MongoClient,
+  ServerApiVersion
+} = require('mongodb');
 const uri = `mongodb+srv://${process.env.USER_DB}:${process.env.USER_PASS}@cluster0.ytnqryr.mongodb.net/?retryWrites=true&w=majority`;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
@@ -23,21 +27,47 @@ async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
-const usersCollection=client.db('dancedb').collection('users')
+    const usersCollection = client.db('dancedb').collection('users')
+    const classCollection = client.db('dancedb').collection('classes')
 
-    app.put('/users', async(req,res)=>{
-      const user=req.body;
-      const query={email:user.email}
-      const options={ upsert: true }
+
+
+
+    app.post("/jwt", (req, res) => {
+      const user = req.body;
+
+      const token = jwt.sign(user, process.env.ACCESS_TOKEN, {
+        expiresIn: '1h'
+      });
+      res.send(token)
+
+    })
+
+    app.put('/users', async (req, res) => {
+      const user = req.body;
+      const query = {
+        email: user.email
+      }
+      const options = {
+        upsert: true
+      }
       const updateDoc = {
-        $set:user
-        
+        $set: user
+
       };
-      const  result=await usersCollection.updateOne(query,updateDoc,options)
+      const result = await usersCollection.updateOne(query, updateDoc, options)
+      res.send(result)
+    })
+    app.get('/popularClass', async (req, res) => {
+      const result = await classCollection.find().limit(6).sort({
+        studentNumber: -1
+      }).toArray()
       res.send(result)
     })
     // Send a ping to confirm a successful connection
-    await client.db("admin").command({ ping: 1 });
+    await client.db("admin").command({
+      ping: 1
+    });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
   } finally {
     // Ensures that the client will close when you finish/error
@@ -50,9 +80,9 @@ run().catch(console.dir);
 
 
 
-app.get('/',(req,res)=>{
-    res.send('server is dancing')
+app.get('/', (req, res) => {
+  res.send('server is dancing')
 })
-app.listen(port,()=>{
-    console.log(`server is dancing on port ${port}`)
+app.listen(port, () => {
+  console.log(`server is dancing on port ${port}`)
 })

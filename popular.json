@@ -3,7 +3,7 @@
       "image": "https://i.ibb.co/nkC8LfS/p-1.jpg",
       "style": "Ballet",
       "instructorName": "Anna Thompson",
-      "availableSeats": 12,
+      "totalSeats": 102,
       "studentNumber": 20,
       "price": {
         "currency": "USD",
@@ -14,7 +14,7 @@
       "image": "https://i.ibb.co/qpvpNPW/p-2.jpg",
       "style": "Hip Hop",
       "instructorName": "Carlos Rodriguez",
-      "availableSeats": 8,
+      "totalSeats": 80,
       "studentNumber": 15,
       "price": {
         "currency": "USD",
@@ -25,7 +25,7 @@
       "image": "https://i.ibb.co/HN2FGm3/p-3.jpg",
       "style": "Salsa",
       "instructorName": "Maria Hernandez",
-      "availableSeats": 15,
+      "totalSeats": 105,
       "studentNumber": 25,
       "price": {
         "currency": "USD",
@@ -36,7 +36,7 @@
       "image": "https://i.ibb.co/PZmVwjx/p-4.webp",
       "style": "Contemporary",
       "instructorName": "Emily Wilson",
-      "availableSeats": 10,
+      "totalSeats": 100,
       "studentNumber": 18,
       "price": {
         "currency": "USD",
@@ -47,7 +47,7 @@
       "image": "https://i.ibb.co/hCsH1S0/p-5.jpg",
       "style": "Tap Dance",
       "instructorName": "Michael Collins",
-      "availableSeats": 6,
+      "totalSeats": 60,
       "studentNumber": 12,
       "price": {
         "currency": "USD",
@@ -58,7 +58,7 @@
       "image": "https://i.ibb.co/2kC1mCx/p-6.jpg",
       "style": "Latin Ballroom",
       "instructorName": "Sophia Martinez",
-      "availableSeats": 10,
+      "totalSeats": 100,
       "studentNumber": 22,
       "price": {
         "currency": "USD",
@@ -69,7 +69,7 @@
       "image": "https://i.ibb.co/nDhNq8g/p-7.jpg",
       "style": "Bollywood",
       "instructorName": "Amit Patel",
-      "availableSeats": 12,
+      "totalSeats": 102,
       "studentNumber": 28,
       "price": {
         "currency": "USD",
@@ -80,7 +80,7 @@
       "image": "https://i.ibb.co/TRp1wms/p-8.jpg",
       "style": "Jazz",
       "instructorName": "Olivia Anderson",
-      "availableSeats": 8,
+      "totalSeats": 80,
       "studentNumber": 16,
       "price": {
         "currency": "USD",
