@@ -66,22 +66,31 @@ async function run() {
       res.send(token)
 
     })
-//save selected cart
-    app.put('/carts', async(req, res) => {
+    //save selected cart
+    app.put('/carts', async (req, res) => {
       console.log(req.query.id)
-       const body=req.body;
-       const query={
-        email:req.query.email, _id:req.query.id
-       }
-       const options={upsert:true}
-       const updatedDoc={
-        $set:body
-        
-       }
-       const result= await addCartCollection.updateOne(query,updatedDoc,options);
-       res.send(result);
+      const body = req.body;
+      const query = {
+        email: req.query.email,
+        _id: req.query.id
+      }
+      const options = {
+        upsert: true
+      }
+      const updatedDoc = {
+        $set: body
+
+      }
+      const result = await addCartCollection.updateOne(query, updatedDoc, options);
+      res.send(result);
     })
-//set admin role
+    //get selected cart
+    app.get('/add/cart',async (req, res) => {
+       const result=await addCartCollection.find().toArray();
+       res.send(result)
+    })
+
+    //set admin role
     app.patch('/users/admin/:id', async (req, res) => {
       const id = req.params.id;
       const query = {
@@ -123,7 +132,7 @@ async function run() {
       const result = await classCollection.updateOne(query, updatedDoc);
       res.send(result);
     })
-//show approved class on the classes page
+    //show approved class on the classes page
     app.get('/classes', async (req, res) => {
       const query = {
         status: 'approved'
@@ -153,14 +162,14 @@ async function run() {
       const result = await classCollection.updateOne(query, updatedDoc, options);
       res.send(result);
     })
-//get all classes showing for admin posted by instructor 
+    //get all classes showing for admin posted by instructor 
     app.get('/addedclass', async (req, res) => {
       const result = await classCollection.find().toArray();
       res.send(result)
     })
 
 
-//instructor role set
+    //instructor role set
     app.patch('/users/instructor/:id', async (req, res) => {
       const id = req.params.id;
       const query = {
@@ -174,12 +183,12 @@ async function run() {
       const result = await usersCollection.updateOne(query, updatedDoc);
       res.send(result);
     })
-//get all users for showing admin
+    //get all users for showing admin
     app.get('/allusers', async (req, res) => {
       const result = await usersCollection.find().toArray()
       res.send(result)
     })
-//inserted class by instructor
+    //inserted class by instructor
     app.post('/addClass', async (req, res) => {
       const data = req.body;
       const result = await classCollection.insertOne(data);
