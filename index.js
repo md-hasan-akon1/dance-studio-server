@@ -26,25 +26,25 @@ const client = new MongoClient(uri, {
 
 const verifyJwt = (req, res, next) => {
   const authorization = req.headers.Authorization;
-console.log(authorization)
+  console.log(authorization)
 
   if (!authorization) {
-      return res.status(401).send({
+    return res.status(401).send({
+      error: true,
+      massage: "unauthorized access"
+    })
+  } else {
+    const token = authorization.split(' ')[1]
+    jwt.verify(token, process.env.ACCESS_TOKEN, (error, decoded) => {
+      if (error) {
+        return res.status(401).send({
           error: true,
           massage: "unauthorized access"
-      })
-  } else {
-      const token = authorization.split(' ')[1]
-      jwt.verify(token, process.env.ACCESS_TOKEN, (error, decoded) => {
-          if (error) {
-              return res.status(401).send({
-                  error: true,
-                  massage: "unauthorized access"
-              })
-          }
-          req.decoded = decoded;
-          next()
-      })
+        })
+      }
+      req.decoded = decoded;
+      next()
+    })
   }
 
 }
@@ -54,59 +54,139 @@ async function run() {
     await client.connect();
     const usersCollection = client.db('dancedb').collection('users')
     const classCollection = client.db('dancedb').collection('classes')
-
+    const addCartCollection = client.db('dancedb').collection('addCarts')
 
 
 
     app.post("/jwt", (req, res) => {
       const user = req.body;
-
       const token = jwt.sign(user, process.env.ACCESS_TOKEN, {
         expiresIn: '1h'
       });
       res.send(token)
 
     })
-
-
+//save selected cart
+    app.put('/carts', async(req, res) => {
+      console.log(req.query.id)
+       const body=req.body;
+       const query={
+        email:req.query.email, _id:req.query.id
+       }
+       const options={upsert:true}
+       const updatedDoc={
+        $set:body
+        
+       }
+       const result= await addCartCollection.updateOne(query,updatedDoc,options);
+       res.send(result);
+    })
+//set admin role
     app.patch('/users/admin/:id', async (req, res) => {
       const id = req.params.id;
       const query = {
-          _id: new ObjectId(id)
+        _id: new ObjectId(id)
       }
       const updatedDoc = {
-          $set: {
-              role: "admin"
-          }
+        $set: {
+          role: "admin"
+        }
       }
       const result = await usersCollection.updateOne(query, updatedDoc);
       res.send(result);
-  })
-    app.patch('/users/instructor/:id', async (req, res) => {
+    })
+    //set approve status
+    app.patch('/addclass/approve/:id', async (req, res) => {
       const id = req.params.id;
       const query = {
-          _id: new ObjectId(id)
+        _id: new ObjectId(id)
       }
       const updatedDoc = {
-          $set: {
-              role: "instructor"
-          }
+        $set: {
+          status: "approved"
+        }
       }
-      const result = await usersCollection.updateOne(query, updatedDoc);
+      const result = await classCollection.updateOne(query, updatedDoc);
       res.send(result);
-  })
+    })
+    //set deny status
+    app.patch('/addclass/deny/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = {
+        _id: new ObjectId(id)
+      }
+      const updatedDoc = {
+        $set: {
+          status: "deny"
+        }
+      }
+      const result = await classCollection.updateOne(query, updatedDoc);
+      res.send(result);
+    })
+//show approved class on the classes page
+    app.get('/classes', async (req, res) => {
+      const query = {
+        status: 'approved'
+      }
 
-    app.get('/allusers',async(req,res)=>{
-      const result=await usersCollection.find().toArray()
+      const result = await classCollection.find(query).toArray()
+      res.send(result)
+
+
+    })
+    //send feedback
+    app.put('/addclass/feedback/:id', async (req, res) => {
+      const data = req.body;
+      console.log(data)
+      const id = req.params.id;
+      const query = {
+        _id: new ObjectId(id)
+      }
+      const options = {
+        upsert: true
+      }
+      const updatedDoc = {
+        $set: {
+          feedback: data
+        }
+      }
+      const result = await classCollection.updateOne(query, updatedDoc, options);
+      res.send(result);
+    })
+//get all classes showing for admin posted by instructor 
+    app.get('/addedclass', async (req, res) => {
+      const result = await classCollection.find().toArray();
       res.send(result)
     })
 
-    app.post('/addClass', async(req,res)=>{
-      const data=req.body;
-      const result=await classCollection.insertOne(data);
+
+//instructor role set
+    app.patch('/users/instructor/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = {
+        _id: new ObjectId(id)
+      }
+      const updatedDoc = {
+        $set: {
+          role: "instructor"
+        }
+      }
+      const result = await usersCollection.updateOne(query, updatedDoc);
       res.send(result);
-      
     })
+//get all users for showing admin
+    app.get('/allusers', async (req, res) => {
+      const result = await usersCollection.find().toArray()
+      res.send(result)
+    })
+//inserted class by instructor
+    app.post('/addClass', async (req, res) => {
+      const data = req.body;
+      const result = await classCollection.insertOne(data);
+      res.send(result);
+
+    })
+    //cheack user and set database
     app.put('/users', async (req, res) => {
       const user = req.body;
       const query = {
@@ -122,8 +202,12 @@ async function run() {
       const result = await usersCollection.updateOne(query, updateDoc, options)
       res.send(result)
     })
+    //get all popular class base on student
     app.get('/popularClass', async (req, res) => {
-      const result = await classCollection.find().limit(6).sort({
+      const query = {
+        status: 'approved'
+      }
+      const result = await classCollection.find(query).limit(6).sort({
         studentNumber: -1
       }).toArray()
       res.send(result)

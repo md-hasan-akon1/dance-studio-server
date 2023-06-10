@@ -1,91 +1,82 @@
 [
-    {
-      "image": "https://i.ibb.co/nkC8LfS/p-1.jpg",
-      "style": "Ballet",
-      "instructorName": "Anna Thompson",
-      "totalSeats": 102,
-      "studentNumber": 20,
-      "price": {
-        "currency": "USD",
-        "amount": 25
-      }
-    },
-    {
-      "image": "https://i.ibb.co/qpvpNPW/p-2.jpg",
-      "style": "Hip Hop",
-      "instructorName": "Carlos Rodriguez",
-      "totalSeats": 80,
-      "studentNumber": 15,
-      "price": {
-        "currency": "USD",
-        "amount": 18
-      }
-    },
-    {
-      "image": "https://i.ibb.co/HN2FGm3/p-3.jpg",
-      "style": "Salsa",
-      "instructorName": "Maria Hernandez",
-      "totalSeats": 105,
-      "studentNumber": 25,
-      "price": {
-        "currency": "USD",
-        "amount": 20
-      }
-    },
-    {
-      "image": "https://i.ibb.co/PZmVwjx/p-4.webp",
-      "style": "Contemporary",
-      "instructorName": "Emily Wilson",
-      "totalSeats": 100,
-      "studentNumber": 18,
-      "price": {
-        "currency": "USD",
-        "amount": 22
-      }
-    },
-    {
-      "image": "https://i.ibb.co/hCsH1S0/p-5.jpg",
-      "style": "Tap Dance",
-      "instructorName": "Michael Collins",
-      "totalSeats": 60,
-      "studentNumber": 12,
-      "price": {
-        "currency": "USD",
-        "amount": 15
-      }
-    },
-    {
-      "image": "https://i.ibb.co/2kC1mCx/p-6.jpg",
-      "style": "Latin Ballroom",
-      "instructorName": "Sophia Martinez",
-      "totalSeats": 100,
-      "studentNumber": 22,
-      "price": {
-        "currency": "USD",
-        "amount": 20
-      }
-    },
-    {
-      "image": "https://i.ibb.co/nDhNq8g/p-7.jpg",
-      "style": "Bollywood",
-      "instructorName": "Amit Patel",
-      "totalSeats": 102,
-      "studentNumber": 28,
-      "price": {
-        "currency": "USD",
-        "amount": 18
-      }
-    },
-    {
-      "image": "https://i.ibb.co/TRp1wms/p-8.jpg",
-      "style": "Jazz",
-      "instructorName": "Olivia Anderson",
-      "totalSeats": 80,
-      "studentNumber": 16,
-      "price": {
-        "currency": "USD",
-        "amount": 15
-      }
-    }
-  ]
-  
+  {
+    "className": "Ballet Basics",
+    "instructorName": "Md Hasan akon",
+    "email": "roki@r.com",
+    "availableSeats": 10,
+    "price": 50.00,
+    "image": "https://i.ibb.co/TRp1wms/p-8.jpg",
+    "status": "pending",
+    "studentNumber": 0
+  },
+  {
+    "className": "Hip Hop Fusion",
+    "instructorName": "Md Hasan akon",
+    "email": "roki@r.com",
+    "availableSeats": 8,
+    "price": 40.00,
+    "image": "https://i.ibb.co/nDhNq8g/p-7.jpg",
+    "status": "pending",
+    "studentNumber": 0
+  },
+  {
+   "className": "Latin Rhythms",
+    "instructorName": "Hasan Akon",
+    "email": "akonhasan680@gmail.com",
+    "availableSeats": 12,
+    "price": 60.00,
+    "image": "https://i.ibb.co/2kC1mCx/p-6.jpg",
+    "status": "pending",
+    "studentNumber": 0
+  },
+  {
+    "className": "Contemporary Dance",
+    "instructorName": "Hasan Akon",
+    "email": "akonhasan680@gmail.com",
+    "availableSeats": 15,
+    "price": 55.00,
+    "image": "https://i.ibb.co/hCsH1S0/p-5.jpg",
+    "status": "pending",
+    "studentNumber": 0
+  },
+  {
+    "className": "Salsa Sensation",
+    "instructorName": "Hasan",
+    "email": "saki@saki.com",
+    "availableSeats": 10,
+    "price": 45.00,
+    "image": "https://i.ibb.co/PZmVwjx/p-4.webp",
+    "status": "pending",
+    "studentNumber": 0
+  },
+  {
+    "className": "Tap Dance Mastery",
+    "instructorName": "Hasan",
+    "email": "saki@saki.com",
+    "availableSeats": 8,
+    "price": 50.00,
+    "image": "https://i.ibb.co/HN2FGm3/p-3.jpg",
+    "status": "pending",
+    "studentNumber": 0
+  },
+  {
+    "className": "Jazz Funk",
+    "instructorName": "Hasan",
+    "email": "b@b.com",
+    "availableSeats": 12,
+    "price": 60.00,
+    "image": "https://i.ibb.co/qpvpNPW/p-2.jpg",
+    "status": "pending",
+    "studentNumber": 0
+  },
+  {
+    "className": "Flamenco Flamboyance",
+    "instructorName": "Hasan",
+    "email": "b@b.com",
+    "availableSeats": 10,
+    "price": 55.00,
+   "image": "https://i.ibb.co/nkC8LfS/p-1.jpg",
+    "status": "pending",
+    "studentNumber": 0
+  }
+]
