@@ -10,7 +10,8 @@ app.use(express.json());
 
 const {
   MongoClient,
-  ServerApiVersion
+  ServerApiVersion,
+  ObjectId
 } = require('mongodb');
 const uri = `mongodb+srv://${process.env.USER_DB}:${process.env.USER_PASS}@cluster0.ytnqryr.mongodb.net/?retryWrites=true&w=majority`;
 
@@ -23,6 +24,30 @@ const client = new MongoClient(uri, {
   }
 });
 
+const verifyJwt = (req, res, next) => {
+  const authorization = req.headers.Authorization;
+console.log(authorization)
+
+  if (!authorization) {
+      return res.status(401).send({
+          error: true,
+          massage: "unauthorized access"
+      })
+  } else {
+      const token = authorization.split(' ')[1]
+      jwt.verify(token, process.env.ACCESS_TOKEN, (error, decoded) => {
+          if (error) {
+              return res.status(401).send({
+                  error: true,
+                  massage: "unauthorized access"
+              })
+          }
+          req.decoded = decoded;
+          next()
+      })
+  }
+
+}
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
@@ -43,6 +68,45 @@ async function run() {
 
     })
 
+
+    app.patch('/users/admin/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = {
+          _id: new ObjectId(id)
+      }
+      const updatedDoc = {
+          $set: {
+              role: "admin"
+          }
+      }
+      const result = await usersCollection.updateOne(query, updatedDoc);
+      res.send(result);
+  })
+    app.patch('/users/instructor/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = {
+          _id: new ObjectId(id)
+      }
+      const updatedDoc = {
+          $set: {
+              role: "instructor"
+          }
+      }
+      const result = await usersCollection.updateOne(query, updatedDoc);
+      res.send(result);
+  })
+
+    app.get('/allusers',async(req,res)=>{
+      const result=await usersCollection.find().toArray()
+      res.send(result)
+    })
+
+    app.post('/addClass', async(req,res)=>{
+      const data=req.body;
+      const result=await classCollection.insertOne(data);
+      res.send(result);
+      
+    })
     app.put('/users', async (req, res) => {
       const user = req.body;
       const query = {
