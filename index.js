@@ -84,6 +84,13 @@ async function run() {
       const result = await addCartCollection.updateOne(query, updatedDoc, options);
       res.send(result);
     })
+    //delete selected class
+    app.get('/item/:id',async(req,res)=>{
+      const id=req.params.id;
+      const query={_id:new ObjectId(id)}
+      const result=await addCartCollection.deleteOne(query);
+      res.send(result)
+    })
     //get selected cart
     app.get('/add/cart',async (req, res) => {
        const result=await addCartCollection.find().toArray();
