@@ -66,6 +66,13 @@ async function run() {
       res.send(token)
 
     })
+    
+    //get popular instructor
+    app.get('/popularteacher',async(req,res)=>{
+      const query={role:'instructor'}
+      const result=await usersCollection.find(query).limit(6).toArray();
+      res.send(result)
+    })
     //save selected cart
     app.put('/carts', async (req, res) => {
       console.log(req.query.id)
