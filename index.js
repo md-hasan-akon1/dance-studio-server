@@ -62,7 +62,7 @@ async function run() {
     app.post("/jwt", (req, res) => {
       const user = req.body;
       const token = jwt.sign(user, process.env.ACCESS_TOKEN, {
-        expiresIn: '1h'
+        expiresIn: '24h'
       });
       res.send(token)
 
@@ -271,13 +271,17 @@ async function run() {
       });
 
     })
+    //
 
     //payment history
-    app.post('/payment', (req, res) => {
-const body=req.body;
+    app.post('/payment', async (req, res) => {
+      const body = req.body;
+      const result = await paymentCollection.insertOne(body)
+
+      res.send(result)
 
 
-})
+    })
     // Send a ping to confirm a successful connection
     await client.db("admin").command({
       ping: 1
