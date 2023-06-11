@@ -86,11 +86,23 @@ async function run() {
     })
     //save selected cart
     app.put('/carts', async (req, res) => {
-      const body = req.body;
+      const body = req.body.data;
+      const email = req.body.data.email;
+      const id = req.body.data.id;
       const query = {
-        email: req.query.email,
-        _id: req.query.id
+            $and: [{
+          email: email
+        }, {
+          id: id
+        }]
       }
+      const cart = await addCartCollection.findOne({$and: [{email: email },{ id:id}]})
+      if (cart) {
+        return res.send('data already added')
+      }
+      // if({email:email===true}&&{_id:new ObjectId(id)===true}){
+      //   return res.send('data already  added')
+      // }
       const options = {
         upsert: true
       }
@@ -111,8 +123,11 @@ async function run() {
       res.send(result)
     })
     //get selected cart
-    app.get('/add/cart', verifyJwt, async (req, res) => {
-      const result = await addCartCollection.find().toArray();
+    app.get('/add/cart/:email', verifyJwt, async (req, res) => {
+      const query = {
+        email: req.params.email
+      }
+      const result = await addCartCollection.find(query).toArray();
       res.send(result)
     })
 
@@ -271,14 +286,62 @@ async function run() {
       });
 
     })
-    //
+    //after payment complete update data
+    // app.patch('update/:id', async (req, res) => {
+    //   const id = req.params.id;
+    //   console.log(id)
+    //   const query = {
+    //     _id: new ObjectId(id)
+    //   }
+    //   const options = {
+    //     upsert: true
+    //   }
+    //   const updatedDoc = {
+    //     $set: {
+    //       availableSeats: -1,
+    //       studentNumber: +1
+    //     }
+    //   }
+
+    //   const result = await classCollection.updateOne(query, updatedDoc, options)
+    //   res.send(result)
+    // })
 
     //payment history
-    app.post('/payment', async (req, res) => {
+    app.patch('/payment/:id', async (req, res) => {
       const body = req.body;
-      const result = await paymentCollection.insertOne(body)
+      const id = req.params.id;
+      console.log(id)
+      const options = {
+        upsert: true
+      }
+      const query = {
+        _id: id
+      }
+      const updatedDoc = {
+        $set: body
+      }
+      const result = await paymentCollection.updateOne(query, updatedDoc, options)
+      const filter = {
+          _id: new ObjectId(body.id)
+          }
+          const upOptions = {
+            upsert: true
+          }
+          const updatedDoc2 = {
+            $set: {
+              availableSeats: body.availableSeats-1,
+              studentNumber:body.studentNumber +1
+            }
+          }
+    
+          const upResult = await classCollection.updateOne(filter, updatedDoc2, upOptions)
 
-      res.send(result)
+
+          const deleteQuery={id:body.id}
+          const deleteResult=await addCartCollection.deleteOne(deleteQuery)
+        //   res.send(result)
+      res.send({result,upResult,deleteResult})
 
 
     })
