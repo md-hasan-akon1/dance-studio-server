@@ -25,13 +25,13 @@ const client = new MongoClient(uri, {
 });
 
 const verifyJwt = (req, res, next) => {
-  const authorization = req.headers.Authorization;
+  const authorization = req.headers.authorization;
   console.log(authorization)
 
   if (!authorization) {
     return res.status(401).send({
       error: true,
-      massage: "unauthorized access"
+      massage: "unauthorized access1"
     })
   } else {
     const token = authorization.split(' ')[1]
@@ -39,7 +39,7 @@ const verifyJwt = (req, res, next) => {
       if (error) {
         return res.status(401).send({
           error: true,
-          massage: "unauthorized access"
+          massage: "unauthorized access2"
         })
       }
       req.decoded = decoded;
@@ -66,11 +66,17 @@ async function run() {
       res.send(token)
 
     })
-    
+
     //get popular instructor
-    app.get('/popularteacher',async(req,res)=>{
+    app.get('/popularteacher', async(req,res)=>{
       const query={role:'instructor'}
       const result=await usersCollection.find(query).limit(6).toArray();
+      res.send(result)
+    })
+    //get all teacher
+    app.get('/allteacher',verifyJwt, async(req,res)=>{
+      const query={role:'instructor'}
+      const result=await usersCollection.find(query).toArray();
       res.send(result)
     })
     //save selected cart
@@ -104,7 +110,8 @@ async function run() {
       res.send(result)
     })
     //get selected cart
-    app.get('/add/cart', async (req, res) => {
+    app.get('/add/cart',verifyJwt, async (req, res) => {
+      console.log(req.headers)
       const result = await addCartCollection.find().toArray();
       res.send(result)
     })
