@@ -3,6 +3,7 @@ const app = express();
 const cors = require('cors');
 require('dotenv').config();
 const jwt = require('jsonwebtoken');
+const stripe = require("stripe")(process.env.PAYMENT_sk)
 const port = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
@@ -26,7 +27,6 @@ const client = new MongoClient(uri, {
 
 const verifyJwt = (req, res, next) => {
   const authorization = req.headers.authorization;
-  console.log(authorization)
 
   if (!authorization) {
     return res.status(401).send({
@@ -55,6 +55,7 @@ async function run() {
     const usersCollection = client.db('dancedb').collection('users')
     const classCollection = client.db('dancedb').collection('classes')
     const addCartCollection = client.db('dancedb').collection('addCarts')
+    const paymentCollection = client.db('dancedb').collection('payments')
 
 
 
@@ -68,20 +69,23 @@ async function run() {
     })
 
     //get popular instructor
-    app.get('/popularteacher', async(req,res)=>{
-      const query={role:'instructor'}
-      const result=await usersCollection.find(query).limit(6).toArray();
+    app.get('/popularteacher', async (req, res) => {
+      const query = {
+        role: 'instructor'
+      }
+      const result = await usersCollection.find(query).limit(6).toArray();
       res.send(result)
     })
     //get all teacher
-    app.get('/allteacher',verifyJwt, async(req,res)=>{
-      const query={role:'instructor'}
-      const result=await usersCollection.find(query).toArray();
+    app.get('/allteacher', verifyJwt, async (req, res) => {
+      const query = {
+        role: 'instructor'
+      }
+      const result = await usersCollection.find(query).toArray();
       res.send(result)
     })
     //save selected cart
     app.put('/carts', async (req, res) => {
-      console.log(req.query.id)
       const body = req.body;
       const query = {
         email: req.query.email,
@@ -100,18 +104,14 @@ async function run() {
     //delete selected class
     app.delete('/item/:id', async (req, res) => {
       const id = req.params.id;
-      console.log(id)
       const query = {
-        _id:id
+        _id: id
       }
-      console.log(query)
       const result = await addCartCollection.deleteOne(query);
-      console.log(result)
       res.send(result)
     })
     //get selected cart
-    app.get('/add/cart',verifyJwt, async (req, res) => {
-      console.log(req.headers)
+    app.get('/add/cart', verifyJwt, async (req, res) => {
       const result = await addCartCollection.find().toArray();
       res.send(result)
     })
@@ -172,7 +172,6 @@ async function run() {
     //send feedback
     app.put('/addclass/feedback/:id', async (req, res) => {
       const data = req.body;
-      console.log(data)
       const id = req.params.id;
       const query = {
         _id: new ObjectId(id)
@@ -247,6 +246,38 @@ async function run() {
       }).toArray()
       res.send(result)
     })
+    //create payment intent
+    app.post("/create-payment-intent", async (req, res) => {
+
+      const {
+        price
+      } = req.body;
+      if (!price) {
+        return
+      }
+
+      const amount = price * 100
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: amount,
+        currency: "usd",
+        payment_method_types: [
+          "card"
+        ],
+
+      })
+
+      res.send({
+        clientSecret: paymentIntent.client_secret,
+      });
+
+    })
+
+    //payment history
+    app.post('/payment', (req, res) => {
+const body=req.body;
+
+
+})
     // Send a ping to confirm a successful connection
     await client.db("admin").command({
       ping: 1
