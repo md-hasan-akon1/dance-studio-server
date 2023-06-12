@@ -43,6 +43,7 @@ const verifyJwt = (req, res, next) => {
         })
       }
       req.decoded = decoded;
+      
       next()
     })
   }
@@ -57,8 +58,7 @@ async function run() {
     const addCartCollection = client.db('dancedb').collection('addCarts')
     const paymentCollection = client.db('dancedb').collection('payments')
 
-
-
+    //jwt
     app.post("/jwt", (req, res) => {
       const user = req.body;
       const token = jwt.sign(user, process.env.ACCESS_TOKEN, {
@@ -67,6 +67,77 @@ async function run() {
       res.send(token)
 
     })
+    //verify admin 
+    const verifyAdmin = async (req, res, next) => {
+      const email = req.decoded.email;
+      const query = {
+        email: email
+      }
+      const user = await usersCollection.findOne(query);
+      if (user ?.role !== 'admin') {
+        return res.status(403).send({
+          error: true,
+          message: 'forbidden messagea'
+        });
+      }
+      next();
+    }
+    //verify admin 
+    const verifyInstructor = async (req, res, next) => {
+      const email = req.decoded.email;
+      const query = {
+        email: email
+      }
+      const user = await usersCollection.findOne(query);
+      if (user ?.role !== 'instructor') {
+        return res.status(403).send({
+          error: true,
+          message: 'forbidden messagei'
+        });
+      }
+      next();
+    }
+
+    // check admin
+    app.get('/users/admin/:email', verifyJwt, async (req, res) => {
+      const email = req.params.email;
+
+      if (req.decoded.email !== email) {
+        res.send({
+          admin: false
+        })
+      }
+
+      const query = {
+        email: email
+      }
+      const user = await usersCollection.findOne(query);
+      const result = {
+        admin: user ?.role === 'admin'
+      }
+      res.send(result);
+    })
+    // check instructor
+    app.get('/users/instructor/:email', verifyJwt, async (req, res) => {
+      const email = req.params.email;
+
+      if (req.decoded.email !== email) {
+        res.send({
+          instructor: false
+        })
+      }
+
+      const query = {
+        email: email
+      }
+      const user = await usersCollection.findOne(query);
+      const result = {
+        instructor: user ?.role === 'instructor'
+      }
+      res.send(result);
+    })
+
+
 
     //get popular instructor
     app.get('/popularteacher', async (req, res) => {
@@ -77,7 +148,7 @@ async function run() {
       res.send(result)
     })
     //get all teacher
-    app.get('/allteacher', verifyJwt, async (req, res) => {
+    app.get('/allteacher',  async (req, res) => {
       const query = {
         role: 'instructor'
       }
@@ -85,18 +156,24 @@ async function run() {
       res.send(result)
     })
     //save selected cart
-    app.put('/carts', async (req, res) => {
+    app.put('/carts',verifyJwt, async  (req, res) => {
       const body = req.body.data;
       const email = req.body.data.email;
       const id = req.body.data.id;
       const query = {
-            $and: [{
+        $and: [{
           email: email
         }, {
           id: id
         }]
       }
-      const cart = await addCartCollection.findOne({$and: [{email: email },{ id:id}]})
+      const cart = await addCartCollection.findOne({
+        $and: [{
+          email: email
+        }, {
+          id: id
+        }]
+      })
       if (cart) {
         return res.send('data already added')
       }
@@ -113,8 +190,16 @@ async function run() {
       const result = await addCartCollection.updateOne(query, updatedDoc, options);
       res.send(result);
     })
+    app.get('/enrolled/:email',verifyJwt, async (req, res) => {
+      const email = req.params.email;
+      const query = {
+        email: email
+      }
+      const result = await paymentCollection.find(query).sort({date:-1}).toArray();
+      res.send(result);
+    })
     //delete selected class
-    app.delete('/item/:id', async (req, res) => {
+    app.delete('/item/:id',verifyJwt, async (req, res) => {
       const id = req.params.id;
       const query = {
         _id: id
@@ -132,7 +217,7 @@ async function run() {
     })
 
     //set admin role
-    app.patch('/users/admin/:id', async (req, res) => {
+    app.patch('/users/admin/:id',verifyJwt,verifyAdmin, async (req, res) => {
       const id = req.params.id;
       const query = {
         _id: new ObjectId(id)
@@ -146,7 +231,7 @@ async function run() {
       res.send(result);
     })
     //set approve status
-    app.patch('/addclass/approve/:id', async (req, res) => {
+    app.patch('/addclass/approve/:id',verifyJwt,verifyAdmin, async (req, res) => {
       const id = req.params.id;
       const query = {
         _id: new ObjectId(id)
@@ -160,7 +245,7 @@ async function run() {
       res.send(result);
     })
     //set deny status
-    app.patch('/addclass/deny/:id', async (req, res) => {
+    app.patch('/addclass/deny/:id',verifyJwt,verifyAdmin, async (req, res) => {
       const id = req.params.id;
       const query = {
         _id: new ObjectId(id)
@@ -185,7 +270,7 @@ async function run() {
 
     })
     //send feedback
-    app.put('/addclass/feedback/:id', async (req, res) => {
+    app.put('/addclass/feedback/:id',verifyJwt,verifyAdmin, async (req, res) => {
       const data = req.body;
       const id = req.params.id;
       const query = {
@@ -203,14 +288,14 @@ async function run() {
       res.send(result);
     })
     //get all classes showing for admin posted by instructor 
-    app.get('/addedclass', async (req, res) => {
+    app.get('/addedclass',verifyJwt,verifyAdmin, async (req, res) => {
       const result = await classCollection.find().toArray();
       res.send(result)
     })
 
 
     //instructor role set
-    app.patch('/users/instructor/:id', async (req, res) => {
+    app.patch('/users/instructor/:id', verifyJwt,verifyAdmin, async (req, res) => {
       const id = req.params.id;
       const query = {
         _id: new ObjectId(id)
@@ -224,12 +309,12 @@ async function run() {
       res.send(result);
     })
     //get all users for showing admin
-    app.get('/allusers', async (req, res) => {
+    app.get('/allusers',verifyJwt,verifyAdmin, async (req, res) => {
       const result = await usersCollection.find().toArray()
       res.send(result)
     })
     //inserted class by instructor
-    app.post('/addClass', async (req, res) => {
+    app.post('/addClass',verifyJwt,verifyInstructor, async (req, res) => {
       const data = req.body;
       const result = await classCollection.insertOne(data);
       res.send(result);
@@ -240,6 +325,10 @@ async function run() {
       const user = req.body;
       const query = {
         email: user.email
+      }
+      const existingUser=await usersCollection.findOne(query)
+      if(existingUser){
+        return res.send('user existing')
       }
       const options = {
         upsert: true
@@ -262,7 +351,7 @@ async function run() {
       res.send(result)
     })
     //create payment intent
-    app.post("/create-payment-intent", async (req, res) => {
+    app.post("/create-payment-intent",verifyJwt, async (req, res) => {
 
       const {
         price
@@ -286,32 +375,11 @@ async function run() {
       });
 
     })
-    //after payment complete update data
-    // app.patch('update/:id', async (req, res) => {
-    //   const id = req.params.id;
-    //   console.log(id)
-    //   const query = {
-    //     _id: new ObjectId(id)
-    //   }
-    //   const options = {
-    //     upsert: true
-    //   }
-    //   const updatedDoc = {
-    //     $set: {
-    //       availableSeats: -1,
-    //       studentNumber: +1
-    //     }
-    //   }
-
-    //   const result = await classCollection.updateOne(query, updatedDoc, options)
-    //   res.send(result)
-    // })
-
+   
     //payment history
-    app.patch('/payment/:id', async (req, res) => {
+    app.patch('/payment/:id',verifyJwt, async (req, res) => {
       const body = req.body;
       const id = req.params.id;
-      console.log(id)
       const options = {
         upsert: true
       }
@@ -323,25 +391,31 @@ async function run() {
       }
       const result = await paymentCollection.updateOne(query, updatedDoc, options)
       const filter = {
-          _id: new ObjectId(body.id)
-          }
-          const upOptions = {
-            upsert: true
-          }
-          const updatedDoc2 = {
-            $set: {
-              availableSeats: body.availableSeats-1,
-              studentNumber:body.studentNumber +1
-            }
-          }
-    
-          const upResult = await classCollection.updateOne(filter, updatedDoc2, upOptions)
+        _id: new ObjectId(body.id)
+      }
+      const upOptions = {
+        upsert: true
+      }
+      const updatedDoc2 = {
+        $set: {
+          availableSeats: body.availableSeats - 1,
+          studentNumber: body.studentNumber + 1
+        }
+      }
+
+      const upResult = await classCollection.updateOne(filter, updatedDoc2, upOptions)
 
 
-          const deleteQuery={id:body.id}
-          const deleteResult=await addCartCollection.deleteOne(deleteQuery)
-        //   res.send(result)
-      res.send({result,upResult,deleteResult})
+      const deleteQuery = {
+        id: body.id
+      }
+      const deleteResult = await addCartCollection.deleteOne(deleteQuery)
+      //   res.send(result)
+      res.send({
+        result,
+        upResult,
+        deleteResult
+      })
 
 
     })
