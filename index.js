@@ -35,6 +35,7 @@ const verifyJwt = (req, res, next) => {
     })
   } else {
     const token = authorization.split(' ')[1]
+  
     jwt.verify(token, process.env.ACCESS_TOKEN, (error, decoded) => {
       if (error) {
         return res.status(401).send({
@@ -52,7 +53,7 @@ const verifyJwt = (req, res, next) => {
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
-    await client.connect();
+    // await client.connect();
     const usersCollection = client.db('dancedb').collection('users')
     const classCollection = client.db('dancedb').collection('classes')
     const addCartCollection = client.db('dancedb').collection('addCarts')
@@ -82,6 +83,13 @@ async function run() {
       }
       next();
     }
+    //get all class for my class by instructor email
+    app.get('/classes/instructor/:email',async(req,res)=>{
+      const email=req.params.email;
+      const query={email:email}
+      const result=await classCollection.find(query).toArray();
+      res.send(result)
+    }) 
     //verify admin 
     const verifyInstructor = async (req, res, next) => {
       const email = req.decoded.email;
@@ -99,43 +107,21 @@ async function run() {
     }
 
     // check admin
-    app.get('/users/admin/:email', verifyJwt, async (req, res) => {
+    app.get('/users/role/:email', verifyJwt, async (req, res) => {
       const email = req.params.email;
 
       if (req.decoded.email !== email) {
-        res.send({
-          admin: false
-        })
+      return  res.status(401).send({massage:'unauthorized'})
       }
 
       const query = {
         email: email
       }
       const user = await usersCollection.findOne(query);
-      const result = {
-        admin: user ?.role === 'admin'
-      }
+      const result = {role:user.role }
       res.send(result);
     })
-    // check instructor
-    app.get('/users/instructor/:email', verifyJwt, async (req, res) => {
-      const email = req.params.email;
-
-      if (req.decoded.email !== email) {
-        res.send({
-          instructor: false
-        })
-      }
-
-      const query = {
-        email: email
-      }
-      const user = await usersCollection.findOne(query);
-      const result = {
-        instructor: user ?.role === 'instructor'
-      }
-      res.send(result);
-    })
+   
 
 
 
@@ -177,9 +163,7 @@ async function run() {
       if (cart) {
         return res.send('data already added')
       }
-      // if({email:email===true}&&{_id:new ObjectId(id)===true}){
-      //   return res.send('data already  added')
-      // }
+     
       const options = {
         upsert: true
       }
@@ -328,7 +312,7 @@ async function run() {
       }
       const existingUser=await usersCollection.findOne(query)
       if(existingUser){
-        return res.send('user existing')
+        return res.send({massage:'user existing'})
       }
       const options = {
         upsert: true
