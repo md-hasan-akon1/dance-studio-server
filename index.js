@@ -7,7 +7,11 @@ const stripe = require("stripe")(process.env.PAYMENT_sk)
 const port = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
+const corsOptions = {
+  origin: ['http://localhost:5000', 'http://example.com'],
+};
 
+app.use(cors(corsOptions));
 
 const {
   MongoClient,
@@ -91,7 +95,7 @@ async function run() {
       res.send(result)
     }) 
     //verify admin 
-    const verifyInstructor = async (req, res, next) => {
+    const verifyInstructor = async(req, res, next) => {
       const email = req.decoded.email;
       const query = {
         email: email
